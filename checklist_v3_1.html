@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>訪問診療 算定チェックリスト</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #f2f3f5;
+  --card: #ffffff;
+  --border: #dde0e6;
+  --text: #1c1e24;
+  --sub: #6b7280;
+  --blue: #1d4ed8;
+  --blue-light: #eff6ff;
+  --green: #15803d;
+  --green-light: #f0fdf4;
+  --purple: #7c3aed;
+  --purple-light: #f5f3ff;
+  --orange: #c2410c;
+  --orange-light: #fff7ed;
+  --red: #b91c1c;
+  --yellow: #92400e;
+  --yellow-light: #fef3c7;
+  --teal: #0f766e;
+  --teal-light: #f0fdfa;
+  --shadow: 0 1px 6px rgba(0,0,0,0.09), 0 4px 16px rgba(0,0,0,0.05);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  padding: 20px 12px 60px;
+  color: var(--text);
+  font-size: 13px;
+}
+
+/* TOP BAR */
+.topbar {
+  max-width: 760px;
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.topbar-left h1 { font-size: 17px; font-weight: 700; letter-spacing: .04em; }
+.topbar-left p { font-size: 11px; color: var(--sub); margin-top: 2px; }
+
+.doctor-toggle {
+  display: flex;
+  background: white;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.doctor-btn {
+  padding: 7px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--sub);
+  transition: all .18s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+.doctor-btn.active-naika   { background: var(--blue-light); color: var(--blue); }
+.doctor-btn.active-seishin { background: var(--purple-light); color: var(--purple); }
+.doctor-btn .dot { width: 7px; height: 7px; border-radius: 99px; display: inline-block; }
+.doctor-btn:first-child .dot { background: var(--blue); }
+.doctor-btn:last-child .dot  { background: var(--purple); }
+
+/* META */
+.meta-card {
+  max-width: 760px; margin: 0 auto 12px;
+  background: white; border-radius: 10px;
+  box-shadow: var(--shadow); padding: 12px 16px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.meta-row { display: flex; align-items: center; gap: 8px; }
+.meta-label { font-size: 11px; font-weight: 700; color: var(--sub); letter-spacing: .06em; white-space: nowrap; }
+.meta-input {
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 8px; font-size: 12px; font-family: inherit;
+  background: var(--bg); color: var(--text); outline: none; transition: border-color .15s;
+}
+.meta-input:focus { border-color: var(--blue); background: white; }
+.meta-input.w-num  { width: 48px; text-align: center; }
+.meta-input.w-time { width: 64px; text-align: center; }
+.meta-input.w-name { width: 120px; }
+.meta-sep { color: var(--sub); font-size: 12px; }
+
+/* PROGRESS */
+.progress-card {
+  max-width: 760px; margin: 0 auto 14px;
+  background: white; border-radius: 10px;
+  box-shadow: var(--shadow); padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.progress-text { font-size: 12px; font-weight: 600; white-space: nowrap; }
+.progress-outer { flex: 1; height: 7px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+.progress-inner {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), #22c55e);
+  border-radius: 99px; transition: width .3s ease; width: 0%;
+}
+.shorisumi-wrap { display: flex; align-items: center; gap: 8px; }
+.shorisumi-label { font-size: 12px; font-weight: 700; color: var(--sub); letter-spacing: .06em; }
+.shorisumi-cb {
+  width: 22px; height: 22px; border: 2px solid var(--border);
+  border-radius: 5px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; transition: all .15s; background: white;
+}
+.shorisumi-cb.on { background: #f59e0b; border-color: #f59e0b; }
+.shorisumi-cb svg { opacity: 0; transition: opacity .12s; }
+.shorisumi-cb.on svg { opacity: 1; }
+
+/* SECTION */
+.section { max-width: 760px; margin: 0 auto 10px; }
+.section-header { display: flex; align-items: center; gap: 8px; padding: 0 4px; margin-bottom: 5px; }
+.section-badge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 99px; letter-spacing: .05em;
+}
+.badge-common   { background: #e5e7eb; color: #374151; }
+.badge-monthly  { background: var(--yellow-light); color: var(--yellow); }
+.badge-naika    { background: var(--blue-light); color: var(--blue); }
+.badge-seishin  { background: var(--purple-light); color: var(--purple); }
+.badge-kensa    { background: #ecfdf5; color: #065f46; }
+.badge-kusuri   { background: #fdf4ff; color: #6b21a8; }
+.badge-resepto  { background: var(--orange-light); color: var(--orange); }
+.badge-jimu     { background: #f3f4f6; color: #374151; }
+.section-title  { font-size: 11px; font-weight: 600; color: var(--sub); letter-spacing: .06em; }
+
+/* SEISHIN ONLY */
+.seishin-only-section { opacity: 0.35; pointer-events: none; transition: opacity .25s; }
+.seishin-only-section.active { opacity: 1; pointer-events: auto; }
+
+/* CARD */
+.item-card {
+  background: white; border-radius: 10px;
+  box-shadow: var(--shadow); margin-bottom: 6px; overflow: hidden;
+}
+
+/* ROW */
+.item-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 14px; cursor: pointer; user-select: none;
+  transition: background .12s; min-height: 44px;
+}
+.item-row:hover { background: #fafbfc; }
+.cb {
+  width: 18px; height: 18px; min-width: 18px;
+  border: 2px solid var(--border); border-radius: 4px;
+  margin-top: 1px; display: flex; align-items: center; justify-content: center;
+  transition: all .15s; background: white; flex-shrink: 0;
+}
+.cb svg { opacity: 0; transition: opacity .12s; }
+.item-row.checked .cb { background: var(--green); border-color: var(--green); }
+.item-row.checked .cb svg { opacity: 1; }
+.item-row.checked .row-title { color: #aaa; text-decoration: line-through; text-decoration-color: #ccc; }
+.row-body { flex: 1; }
+.row-title { font-size: 13px; font-weight: 600; line-height: 1.3; transition: color .15s; }
+.row-note  { font-size: 10px; color: var(--sub); margin-top: 2px; }
+
+/* SUB */
+.sub-area {
+  padding: 0 14px 12px 42px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.sub-row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+.sub-row-label { font-size: 10px; color: var(--sub); font-weight: 600; white-space: nowrap; min-width: 56px; }
+
+.tag {
+  font-size: 11px; font-weight: 500; padding: 3px 9px;
+  border-radius: 99px; border: 1.5px solid var(--border);
+  background: #f3f4f6; color: #374151;
+  cursor: pointer; transition: all .12s; user-select: none; white-space: nowrap;
+}
+.tag:hover { border-color: #9ca3af; }
+.tag.sel-blue   { background: var(--blue); border-color: var(--blue); color: white; }
+.tag.sel-green  { background: var(--green); border-color: var(--green); color: white; }
+.tag.sel-purple { background: var(--purple); border-color: var(--purple); color: white; }
+.tag.sel-orange { background: var(--orange); border-color: var(--orange); color: white; }
+.tag.sel-teal   { background: var(--teal); border-color: var(--teal); color: white; }
+.tag.note-tag   { background: #fff8e1; border-color: #fde68a; color: #78350f; cursor: default; font-style: italic; }
+
+.radio-tag {
+  font-size: 11px; font-weight: 500; padding: 3px 9px;
+  border-radius: 99px; border: 1.5px solid var(--border);
+  background: #f3f4f6; color: #374151;
+  cursor: pointer; transition: all .12s; user-select: none; white-space: nowrap;
+}
+.radio-tag.active { background: var(--blue); border-color: var(--blue); color: white; }
+
+.inline-in {
+  border: 1px solid var(--border); border-radius: 5px;
+  padding: 2px 7px; font-size: 11px; font-family: inherit;
+  background: var(--bg); color: var(--text); outline: none;
+  transition: border-color .15s; width: 52px; text-align: center;
+}
+.inline-in:focus { border-color: var(--blue); background: white; }
+
+.card-divider { height: 1px; background: var(--border); margin: 0 14px; }
+
+/* ===== 施設総管 ①〜⑤ ===== */
+.sousou-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 0 14px 12px 42px;
+}
+.sousou-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: all .15s;
+  background: #fafbfc;
+}
+.sousou-item:hover { border-color: #9ca3af; background: white; }
+.sousou-item.selected {
+  border-color: var(--blue);
+  background: var(--blue-light);
+}
+.sousou-num {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sub);
+  min-width: 18px;
+  margin-top: 1px;
+  transition: color .15s;
+}
+.sousou-item.selected .sousou-num { color: var(--blue); }
+.sousou-body {}
+.sousou-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  transition: color .15s;
+}
+.sousou-item.selected .sousou-title { color: var(--blue); }
+.sousou-sub {
+  font-size: 10px;
+  color: var(--sub);
+  margin-top: 2px;
+}
+
+.sousou-checks {
+  padding: 0 14px 12px 42px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+/* ===== 採血 ===== */
+.saketsu-toggle {
+  display: flex;
+  background: #f3f4f6;
+  border-radius: 7px;
+  padding: 3px;
+  gap: 3px;
+  margin-bottom: 2px;
+}
+.saketsu-btn {
+  flex: 1;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  border: none;
+  background: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: var(--sub);
+  transition: all .15s;
+  text-align: center;
+}
+.saketsu-btn.active-doc { background: white; color: var(--blue); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.saketsu-btn.active-ns  { background: white; color: var(--teal); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+.saketsu-note {
+  font-size: 10px;
+  color: var(--sub);
+  padding: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+/* ===== 採血項目 ===== */
+.kenketsu-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 0 14px 8px 42px;
+}
+
+.kb-tag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: #f3f4f6;
+  color: #374151;
+  cursor: pointer;
+  transition: all .12s;
+  user-select: none;
+}
+.kb-tag:hover { border-color: #9ca3af; }
+.kb-tag.active { background: var(--green); border-color: var(--green); color: white; }
+
+/* ===== 疑い病名サジェスト ===== */
+.byomei-box {
+  margin: 0 14px 12px 42px;
+  background: var(--teal-light);
+  border: 1.5px solid #99f6e4;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: none;
+}
+.byomei-box.visible { display: block; }
+.byomei-box-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--teal);
+  letter-spacing: .06em;
+  margin-bottom: 7px;
+}
+.byomei-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.byomei-chip {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  border: 1.5px solid #5eead4;
+  background: white;
+  color: var(--teal);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all .12s;
+  user-select: none;
+}
+.byomei-chip:hover { background: #ccfbf1; }
+.byomei-chip.added { background: var(--teal); color: white; border-color: var(--teal); }
+.byomei-chip .chip-icon { font-size: 10px; }
+
+.byomei-added-area {
+  margin: 4px 14px 12px 42px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.added-byomei {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: var(--teal-light);
+  border: 1.5px solid #5eead4;
+  color: var(--teal);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.added-byomei .rm { cursor: pointer; font-size: 12px; color: #9ca3af; }
+.added-byomei .rm:hover { color: var(--red); }
+
+/* ===== 併算定条件ブロック ===== */
+.heisan-box {
+  margin: 0 14px 12px 42px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1.5px solid #ddd6fe;
+}
+.heisan-header {
+  background: var(--purple-light);
+  padding: 7px 12px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--purple);
+  letter-spacing: .06em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.heisan-section {
+  padding: 8px 12px;
+  background: white;
+}
+.heisan-section + .heisan-section {
+  border-top: 1px solid #ede9fe;
+}
+.heisan-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.label-ok  { color: var(--green); }
+.label-ng  { color: var(--red); }
+.label-chk { color: var(--orange); }
+.heisan-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.heisan-chip {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+.chip-ok  { background: #f0fdf4; border: 1.5px solid #86efac; color: var(--green); }
+.chip-ng  { background: #fef2f2; border: 1.5px solid #fca5a5; color: var(--red); }
+.chip-chk { background: #fff7ed; border: 1.5px solid #fdba74; color: var(--orange); }
+.heisan-chk-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-bottom: 4px;
+}
+.heisan-chk-row:last-child { margin-bottom: 0; }
+.hcb {
+  width: 15px; height: 15px; min-width: 15px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 3px; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .15s; background: white; flex-shrink: 0;
+}
+.hcb svg { opacity: 0; transition: opacity .12s; }
+.hcb.on  { background: var(--orange); border-color: var(--orange); }
+.hcb.on svg { opacity: 1; }
+.hcb-label {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* reset btn */
+.reset-btn {
+  display: block; margin: 20px auto 0;
+  max-width: 760px; width: 100%;
+  background: white; border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 9px;
+  font-size: 12px; font-family: inherit;
+  color: var(--sub); cursor: pointer; transition: all .15s; font-weight: 500;
+}
+.reset-btn:hover { border-color: var(--red); color: var(--red); }
+
+@media (max-width: 500px) {
+  .sousou-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <h1>訪問診療 算定チェックリスト</h1>
+    <p>内科・精神科在宅対応版</p>
+  </div>
+</div>
+
+<!-- META -->
+<div class="meta-card">
+  <div class="meta-row">
+    <span class="meta-label">患者名</span>
+    <input class="meta-input w-name" type="text" id="meta-patient" placeholder="　　　　　　様">
+  </div>
+  <div class="meta-row">
+    <span class="meta-label">訪問医</span>
+    <input class="meta-input w-name" type="text" id="meta-doctor-name" placeholder="Dr.　　　　　">
+  </div>
+  <div class="meta-row">
+    <span class="meta-label">レセプト担当</span>
+    <input class="meta-input w-name" type="text" id="meta-receipt" placeholder="担当者名">
+  </div>
+</div>
+
+<!-- 処理済 -->
+<div class="progress-card">
+  <div class="shorisumi-wrap">
+    <span class="shorisumi-label">処理済</span>
+    <div class="shorisumi-cb" id="shorisumi" onclick="this.classList.toggle('on')">
+      <svg width="12" height="10" viewBox="0 0 12 10"><polyline points="1,5 4.5,8.5 11,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 1. 基本診療料 ========== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge badge-common">共通</span>
+    <span class="section-title">基本診療料</span>
+  </div>
+  <div class="item-card">
+
+    <!-- 在宅患者訪問診療料 -->
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">在宅患者訪問診療料</div>
+        <div class="row-note">計画的な定期訪問。再診料は包括のため別途算定不可</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="sub-row-label">区分</span>
+        <span class="radio-tag active" data-group="homon-ku" onclick="radioSelect(this)">Ⅰ（自院が計画的管理）</span>
+        <span class="radio-tag" data-group="homon-ku" onclick="radioSelect(this)">Ⅱ（他院からの依頼）</span>
+      </div>
+      <div class="sub-row">
+        <span class="sub-row-label">建物</span>
+        <span class="radio-tag active" data-group="homon-build" onclick="radioSelect(this)">同一建物以外</span>
+        <span class="radio-tag" data-group="homon-build" onclick="radioSelect(this)">同一建物2〜9人</span>
+        <span class="radio-tag" data-group="homon-build" onclick="radioSelect(this)">同一建物10人以上</span>
+      </div>
+      <!-- 訪問日付 複数入力 -->
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <div style="font-size:10px; font-weight:700; color:var(--sub); letter-spacing:.05em;">訪問日（複数入力可）</div>
+        <div id="visit-dates" style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;">
+          <input type="date" class="visit-date-input" style="border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-family:inherit; background:var(--bg); color:var(--text); outline:none; transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+        </div>
+        <button onclick="addVisitDate()" style="align-self:flex-start; padding:3px 10px; font-size:11px; font-family:inherit; font-weight:600; background:var(--blue-light); color:var(--blue); border:1.5px solid #bfdbfe; border-radius:6px; cursor:pointer;">＋ 日付を追加</button>
+      </div>
+    </div>
+
+    <div class="card-divider"></div>
+
+    <!-- 往診 -->
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">往診料＋再診料</div>
+        <div class="row-note">患者・家族等の求めによる緊急訪問。往診料と再診料を併算定。訪問診療料との同日算定は不可</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="sub-row-label">往診加算</span>
+        <span class="tag" onclick="selTag(this,'blue')">緊急往診加算</span>
+        <span class="tag" onclick="selTag(this,'blue')">夜間往診加算</span>
+        <span class="tag" onclick="selTag(this,'blue')">深夜往診加算</span>
+        <span class="tag" onclick="selTag(this,'blue')">休日往診加算</span>
+      </div>
+      <div class="sub-row">
+        <span class="sub-row-label">再診料</span>
+        <span class="radio-tag active" data-group="oushin-saichin" onclick="radioSelect(this)">再診料（外来管理加算なし）</span>
+        <span class="radio-tag" data-group="oushin-saichin" onclick="radioSelect(this)">再診料＋外来管理加算</span>
+      </div>
+      <div class="sub-row">
+        <span class="sub-row-label">時間帯</span>
+        <span class="radio-tag active" data-group="oushin-jikan" onclick="radioSelect(this)">通常</span>
+        <span class="radio-tag" data-group="oushin-jikan" onclick="radioSelect(this)">時間外</span>
+        <span class="radio-tag" data-group="oushin-jikan" onclick="radioSelect(this)">休日</span>
+        <span class="radio-tag" data-group="oushin-jikan" onclick="radioSelect(this)">深夜</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <div style="font-size:10px; font-weight:700; color:var(--sub); letter-spacing:.05em;">往診日（複数入力可）</div>
+        <div id="oushin-dates" style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;">
+          <input type="date" class="oushin-date-input" style="border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-family:inherit; background:var(--bg); color:var(--text); outline:none;" onfocus="this.style.borderColor='var(--blue)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+        </div>
+        <button onclick="addDateTo('oushin-dates','oushin-date-input')" style="align-self:flex-start; padding:3px 10px; font-size:11px; font-family:inherit; font-weight:600; background:var(--blue-light); color:var(--blue); border:1.5px solid #bfdbfe; border-radius:6px; cursor:pointer;">＋ 日付を追加</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== 同一患家 ========== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge badge-common">確認</span>
+    <span class="section-title">同一患家の算定要件</span>
+  </div>
+  <div class="item-card">
+
+    <!-- 往診料：2人目以降は算定不可 -->
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">往診料：同一患家2人目以降は算定不可</div>
+        <div class="row-note">同一患家への往診は最初の1人のみ算定可</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="radio-tag active" data-group="oushin-kanja" onclick="radioSelect(this)">1人目のみ（往診料算定）</span>
+        <span class="radio-tag" data-group="oushin-kanja" onclick="radioSelect(this)">2人目以降あり（往診料算定不可）</span>
+      </div>
+    </div>
+
+    <div class="card-divider"></div>
+
+    <!-- 同一日・同一患家への複数回訪問 -->
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">同一日・同一患家への複数回訪問</div>
+        <div class="row-note">2回目以降の訪問診療料は算定不可。やむを得ない場合は往診料で対応</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="radio-tag active" data-group="fukusukai" onclick="radioSelect(this)">1回のみ</span>
+        <span class="radio-tag" data-group="fukusukai" onclick="radioSelect(this)">複数回訪問あり→往診料で算定</span>
+      </div>
+    </div>
+
+    <div class="card-divider"></div>
+
+    <!-- 確認チェック -->
+    <div style="padding:8px 14px 12px;">
+      <div style="font-size:10px; font-weight:700; color:var(--sub); letter-spacing:.05em; margin-bottom:6px;">📋 確認チェック</div>
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label">往診料は同一患家で最初の1人のみ算定し、2人目以降は算定していない</span>
+        </div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label">同一日に同一患家へ2回以上の訪問診療料を算定していない</span>
+        </div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label">カルテに患者ごとの訪問記録が個別に記載されている</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== 2. 月次管理料（施設総管①〜⑤） ========== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge badge-monthly">月次</span>
+    <span class="section-title">月次管理料（月1回）</span>
+  </div>
+  <div class="item-card">
+
+    <!-- 在医総管 -->
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">在宅時医学総合管理料（在医総管）</div>
+        <div class="row-note">戸建て・在宅患者向け</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="sub-row-label">訪問回数</span>
+        <span class="radio-tag active" data-group="zaiisoukan-freq" onclick="radioSelect(this)">月2回以上</span>
+        <span class="radio-tag" data-group="zaiisoukan-freq" onclick="radioSelect(this)">月1回</span>
+      </div>
+      <div class="sub-row">
+        <span class="sub-row-label">患者数</span>
+        <span class="radio-tag active" data-group="zaiisoukan-num" onclick="radioSelect(this)">単一1人</span>
+        <span class="radio-tag" data-group="zaiisoukan-num" onclick="radioSelect(this)">単一2〜9人</span>
+        <span class="radio-tag" data-group="zaiisoukan-num" onclick="radioSelect(this)">単一10人以上</span>
+      </div>
+      <div class="sub-row">
+        <span class="tag" onclick="selTag(this,'orange')">早期移行加算 ※コメント</span>
+        <span class="tag" onclick="selTag(this,'orange')">寝たきり加算</span>
+      </div>
+    </div>
+
+    <div class="card-divider"></div>
+
+    <!-- 施設総管 ①〜⑤ -->
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">施設入居時等医学総合管理料（施設総管）</div>
+        <div class="row-note">有料老人ホーム・グループホーム等の入居者向け。算定区分①〜⑤を選択</div>
+      </div>
+    </div>
+
+    <!-- ①〜⑤ グリッド（単一建物診療患者数による区分） -->
+    <div class="sousou-grid" id="sousou-grid">
+      <div class="sousou-item" onclick="selectSousou(this, 1)">
+        <div class="sousou-num">①</div>
+        <div class="sousou-body">
+          <div class="sousou-title">単一建物　1人</div>
+          <div class="sousou-sub">最も高い点数区分</div>
+        </div>
+      </div>
+      <div class="sousou-item" onclick="selectSousou(this, 2)">
+        <div class="sousou-num">②</div>
+        <div class="sousou-body">
+          <div class="sousou-title">単一建物　2〜9人</div>
+          <div class="sousou-sub">小規模施設・少人数棟</div>
+        </div>
+      </div>
+      <div class="sousou-item" onclick="selectSousou(this, 3)">
+        <div class="sousou-num">③</div>
+        <div class="sousou-body">
+          <div class="sousou-title">単一建物　10〜19人</div>
+          <div class="sousou-sub">中規模施設</div>
+        </div>
+      </div>
+      <div class="sousou-item" onclick="selectSousou(this, 4)">
+        <div class="sousou-num">④</div>
+        <div class="sousou-body">
+          <div class="sousou-title">単一建物　20〜49人</div>
+          <div class="sousou-sub">大規模施設</div>
+        </div>
+      </div>
+      <div class="sousou-item" onclick="selectSousou(this, 5)">
+        <div class="sousou-num">⑤</div>
+        <div class="sousou-body">
+          <div class="sousou-title">①〜④以外　（50人以上）</div>
+          <div class="sousou-sub">最も点数が低い区分</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 施設総管 訪問回数・共通チェック -->
+    <div class="sousou-checks">
+      <div style="width:100%; display:flex; align-items:center; gap:6px; margin-bottom:2px;">
+        <span style="font-size:10px;font-weight:700;color:var(--sub);min-width:56px;">訪問回数</span>
+        <span class="radio-tag active" data-group="shisetsu-freq" onclick="radioSelect(this)">月2回以上</span>
+        <span class="radio-tag" data-group="shisetsu-freq" onclick="radioSelect(this)">月1回</span>
+      </div>
+      <span class="tag" onclick="selTag(this,'blue')">機能強化型（在支診）</span>
+      <span class="tag" onclick="selTag(this,'orange')">早期移行加算 ※コメント</span>
+      <span class="tag" onclick="selTag(this,'orange')">寝たきり加算</span>
+      <span class="tag note-tag">レセコメント必須</span>
+      <span class="tag note-tag">選択式コメント必須</span>
+    </div>
+
+    <div class="card-divider"></div>
+
+    <!-- 頻回・長時間 -->
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">頻回・長時間訪問加算</div>
+        <div class="row-note">カルテに訪問時間の記録要</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="tag" onclick="selTag(this,'blue')">頻回訪問加算</span>
+        <span class="tag" onclick="selTag(this,'blue')">長時間訪問加算</span>
+        <input class="inline-in" type="number" placeholder="分">
+        <span class="tag note-tag">※カルテ時間修正</span>
+        <span class="tag" onclick="selTag(this,'blue')">機器関連</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== 3. 在宅精神療法 ========== -->
+<div class="section" id="seishin-section">
+  <div class="section-header">
+    <span class="section-badge badge-seishin">精神科医のみ</span>
+    <span class="section-title">精神科医が訪問した場合のみ算定可</span>
+  </div>
+  <div class="item-card">
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">在宅精神療法</div>
+        <div class="row-note">精神科を標榜する医療機関の精神科医が訪問した場合のみ算定可</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="sub-row-label">初再診</span>
+        <span class="radio-tag active" data-group="seishin-type" onclick="radioSelect(this)">再診</span>
+        <span class="radio-tag" data-group="seishin-type" onclick="radioSelect(this)">初診</span>
+      </div>
+      <div class="sub-row">
+        <span class="sub-row-label">時間</span>
+        <span class="radio-tag active" data-group="seishin-time" onclick="radioSelect(this)">30分未満</span>
+        <span class="radio-tag" data-group="seishin-time" onclick="radioSelect(this)">30分以上</span>
+      </div>
+      <div class="sub-row">
+        <span class="tag" onclick="selTag(this,'purple')">措置入院歴あり加算</span>
+        <span class="tag" onclick="selTag(this,'purple')">重症患者加算</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <div style="font-size:10px; font-weight:700; color:var(--sub); letter-spacing:.05em;">実施日（複数入力可）</div>
+        <div id="seishin-dates" style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;">
+          <input type="date" class="seishin-date-input" style="border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-family:inherit; background:var(--bg); color:var(--text); outline:none;" onfocus="this.style.borderColor='var(--purple)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+        </div>
+        <button onclick="addDateTo('seishin-dates','seishin-date-input')" style="align-self:flex-start; padding:3px 10px; font-size:11px; font-family:inherit; font-weight:600; background:var(--purple-light); color:var(--purple); border:1.5px solid #ddd6fe; border-radius:6px; cursor:pointer;">＋ 日付を追加</button>
+      </div>
+    </div>
+
+    <!-- 併算定条件ブロック -->
+    <div class="heisan-box">
+      <div class="heisan-header">⚖️ 在宅患者訪問診療料・在医総管・施設総管との関係</div>
+
+      <!-- ○ 同日算定可 -->
+      <div class="heisan-section">
+        <div class="heisan-section-label label-ok">✅ 同日算定できるもの</div>
+        <div class="heisan-items">
+          <span class="heisan-chip chip-ok">在宅患者訪問診療料Ⅰ・Ⅱ</span>
+          <span class="heisan-chip chip-ok">往診料</span>
+          <span class="heisan-chip chip-ok">処方箋料・薬剤料</span>
+          <span class="heisan-chip chip-ok">各種検査料</span>
+          <span class="heisan-chip chip-ok">処置料</span>
+        </div>
+      </div>
+
+      <!-- × 算定不可 -->
+      <div class="heisan-section">
+        <div class="heisan-section-label label-ng">🚫 同日算定できないもの（精神療法系）</div>
+        <div class="heisan-items">
+          <span class="heisan-chip chip-ng">通院精神療法</span>
+          <span class="heisan-chip chip-ng">標準型精神分析療法</span>
+          <span class="heisan-chip chip-ng">認知療法・認知行動療法</span>
+          <span class="heisan-chip chip-ng">入院精神療法</span>
+          <span class="heisan-chip chip-ng">心身医学療法</span>
+          <span class="heisan-chip chip-ng">精神科ショート・ケア等</span>
+        </div>
+      </div>
+
+      <!-- 在医総管・施設総管 原則不可 -->
+      <div class="heisan-section">
+        <div class="heisan-section-label label-ng">⚠️ 在医総管・施設総管　原則算定不可</div>
+        <div class="heisan-items" style="margin-bottom:8px;">
+          <span class="heisan-chip chip-ng">在医総管：在宅精神療法＋訪問診療料(Ⅰ)「1」を算定している場合は算定不可</span>
+        </div>
+        <div class="heisan-items">
+          <span class="heisan-chip chip-ng">施設総管：在宅精神療法＋訪問診療料(Ⅰ)「1」または(Ⅱ)「イ」を算定している場合は算定不可</span>
+        </div>
+      </div>
+
+      <!-- 例外：別表第８の４ -->
+      <div class="heisan-section">
+        <div class="heisan-section-label label-chk">🔓 例外：別表第８の４の状態に該当すれば算定可</div>
+        <div style="font-size:10px; color:var(--sub); margin-bottom:8px; line-height:1.6;">
+          以下のア〜エのいずれかに該当する患者は、在宅精神療法と在医総管・施設総管を併算定できる
+        </div>
+
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label"><b>ア</b>　別表第８の２に掲げる状態の患者</span>
+        </div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label"><b>イ</b>　要介護２以上またはこれに準ずる状態<br>
+            <span style="font-size:10px;color:var(--sub);">（要介護2〜5 ／ 障害支援区分2〜5）</span>
+          </span>
+        </div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label"><b>ウ</b>　訪問診療・訪問看護で処置を受けている状態、または特定施設等で看護師による処置を受けている状態<br>
+            <span style="font-size:10px;color:var(--sub);">（包括的支援加算のエ・オに該当）</span>
+          </span>
+        </div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label"><b>エ</b>　がん治療中、または精神疾患以外の疾患で訪問診療医による特別な医学管理が必要な状態<br>
+            <span style="font-size:10px;color:var(--sub);">（悪性腫瘍と診断され緩和ケアを含む治療中 ／ 包括的支援加算のキに該当）</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- 算定前の確認事項 -->
+      <div class="heisan-section">
+        <div class="heisan-section-label label-chk">📋 算定前の確認事項（共通）</div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label">精神科を標榜する保険医療機関の精神科医が訪問した</span>
+        </div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label">患者は在宅（自宅・施設等）で療養中（入院中は算定不可）</span>
+        </div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label">カルテに実施時間（開始〜終了）の記録がある</span>
+        </div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label">カルテに療法の内容・患者状態の記録がある</span>
+        </div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label">同日に通院精神療法等を算定していない</span>
+        </div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label">30分以上の場合：実際の面接時間が30分以上であることを確認</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">精神科訪問看護指示書</div>
+        <div class="row-note">精神科医師の指示が必要な訪問看護ステーションへ</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="radio-tag active" data-group="seishin-kango" onclick="radioSelect(this)">あり</span>
+        <span class="radio-tag" data-group="seishin-kango" onclick="radioSelect(this)">なし</span>
+        <span class="tag" onclick="selTag(this,'purple')">精神科特別訪問看護指示書（月2回まで）</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 4. 処置・管理料 ========== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge badge-naika">処置・管理料</span>
+    <span class="section-title">処置・在宅管理料</span>
+  </div>
+  <div class="item-card">
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body"><div class="row-title">処置入力</div></div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="tag" onclick="selTag(this,'blue')">創傷処置</span>
+        <span class="tag" onclick="selTag(this,'blue')">褥瘡処置</span>
+        <span class="tag" onclick="selTag(this,'blue')">胃瘻（GF）管理</span>
+        <span class="tag" onclick="selTag(this,'blue')">経管栄養指導</span>
+        <span class="tag" onclick="selTag(this,'blue')">注射</span>
+      </div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">在宅患者訪問点滴注射管理指導料</div>
+        <div class="row-note">週3日以上の点滴の場合。薬剤費別途算定</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="tag" onclick="selTag(this,'blue')">薬剤入力</span>
+        <span class="tag" onclick="selTag(this,'blue')">訪看への指示</span>
+      </div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">在宅各種管理料</div>
+        <div class="row-note">月1回算定。病名・機器との整合性確認</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="tag" onclick="selTag(this,'blue')">在宅酸素療法</span>
+        <span class="tag" onclick="selTag(this,'blue')">在宅自己注射</span>
+        <span class="tag" onclick="selTag(this,'blue')">在宅人工呼吸</span>
+        <span class="tag" onclick="selTag(this,'blue')">在宅経管栄養</span>
+        <span class="tag" onclick="selTag(this,'blue')">在宅褥瘡管理</span>
+        <span class="tag" onclick="selTag(this,'blue')">悪性腫瘍患者指導</span>
+      </div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">ターミナルケア加算 / 看取り加算</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="tag" onclick="selTag(this,'orange')">在宅ターミナルケア加算</span>
+        <span class="tag" onclick="selTag(this,'orange')">看取り加算</span>
+        <span class="tag" onclick="selTag(this,'orange')">死亡診断加算</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 5. 採血・検査 ========== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge badge-kensa">検査</span>
+    <span class="section-title">採血・検査</span>
+  </div>
+  <div class="item-card">
+
+    <!-- 採血 メインチェック -->
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">採血</div>
+        <div class="row-note">実施者によって算定が異なります</div>
+      </div>
+    </div>
+
+    <!-- 医師/看護師 トグル -->
+    <div style="padding: 0 14px 4px 42px;">
+      <div class="saketsu-toggle">
+        <button class="saketsu-btn active-doc" id="saketsu-doc" onclick="setSaketsu('doc')">🩺 医師が実施</button>
+        <button class="saketsu-btn" id="saketsu-ns"  onclick="setSaketsu('ns')">👩‍⚕️ 看護師が実施</button>
+      </div>
+      <div class="saketsu-note" id="saketsu-note">
+        ✅ <b>採血料を医療費として算定可</b>。スピッツ準備・検体ラベル貼付・依頼書確認を行うこと。
+      </div>
+    </div>
+
+    <!-- 採血項目 -->
+    <div style="padding: 0 14px 4px 42px; font-size: 10px; font-weight: 700; color: var(--sub); letter-spacing: .06em; margin-bottom: 2px;">
+      採血項目（選択すると疑い病名をサジェスト）
+    </div>
+    <div class="kenketsu-grid" id="kb-grid">
+      <span class="kb-tag" data-byomei="貧血の疑い,鉄欠乏性貧血の疑い" onclick="toggleKb(this)">CBC（血算）</span>
+      <span class="kb-tag" data-byomei="糖尿病の疑い" onclick="toggleKb(this)">HbA1c</span>
+      <span class="kb-tag" data-byomei="糖尿病の疑い,低血糖の疑い" onclick="toggleKb(this)">血糖</span>
+      <span class="kb-tag" data-byomei="脂質異常症の疑い,高コレステロール血症の疑い" onclick="toggleKb(this)">LDL/HDL/TG</span>
+      <span class="kb-tag" data-byomei="慢性腎臓病の疑い,腎不全の疑い" onclick="toggleKb(this)">BUN/Cr</span>
+      <span class="kb-tag" data-byomei="肝機能障害の疑い,脂肪肝の疑い" onclick="toggleKb(this)">AST/ALT/γGTP</span>
+      <span class="kb-tag" data-byomei="甲状腺機能低下症の疑い,甲状腺機能亢進症の疑い" onclick="toggleKb(this)">TSH/FT3/FT4</span>
+      <span class="kb-tag" data-byomei="電解質異常の疑い,低ナトリウム血症の疑い" onclick="toggleKb(this)">Na/K/Cl（電解質）</span>
+      <span class="kb-tag" data-byomei="炎症性疾患の疑い,感染症の疑い" onclick="toggleKb(this)">CRP</span>
+      <span class="kb-tag" data-byomei="凝固異常の疑い" onclick="toggleKb(this)">PT-INR</span>
+      <span class="kb-tag" data-byomei="高尿酸血症の疑い,痛風の疑い" onclick="toggleKb(this)">UA（尿酸）</span>
+      <span class="kb-tag" data-byomei="低栄養の疑い,低アルブミン血症の疑い" onclick="toggleKb(this)">アルブミン</span>
+      <span class="kb-tag" data-byomei="心不全の疑い" onclick="toggleKb(this)">BNP/NT-proBNP</span>
+      <span class="kb-tag" data-byomei="ビタミンD欠乏症の疑い,骨粗鬆症の疑い" onclick="toggleKb(this)">25-OH ビタミンD</span>
+      <span class="kb-tag" data-byomei="副甲状腺機能亢進症の疑い" onclick="toggleKb(this)">PTH</span>
+      <span class="kb-tag" data-byomei="梅毒の疑い" onclick="toggleKb(this)">梅毒・RPR</span>
+    </div>
+
+    <!-- 疑い病名サジェスト -->
+    <div class="byomei-box" id="byomei-box">
+      <div class="byomei-box-title">🏷 採血項目から疑い病名のサジェスト（クリックで追加）</div>
+      <div class="byomei-list" id="byomei-list"></div>
+    </div>
+
+    <!-- 追加済み病名 -->
+    <div class="byomei-added-area" id="byomei-added"></div>
+
+    <!-- 検体検査判断料 -->
+    <div style="padding: 0 14px 12px 42px;">
+      <div style="font-size:10px; font-weight:700; color:var(--sub); letter-spacing:.05em; margin-bottom:6px;">検体検査判断料（月1回・該当するものをチェック）</div>
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <div class="item-row" style="padding:7px 10px; border:1.5px solid var(--border); border-radius:8px; background:#fafbfc; min-height:unset;" onclick="toggleRow(this)">
+          <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="row-body">
+            <div class="row-title" style="font-size:12px;">判断料① 検体検査判断料（尿・糞便等）</div>
+            <div class="row-note">尿一般、糞便、喀痰等の検査を行った場合</div>
+          </div>
+        </div>
+        <div class="item-row" style="padding:7px 10px; border:1.5px solid var(--border); border-radius:8px; background:#fafbfc; min-height:unset;" onclick="toggleRow(this)">
+          <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="row-body">
+            <div class="row-title" style="font-size:12px;">判断料② 検体検査判断料（血液学的検査）</div>
+            <div class="row-note">CBC・PT-INR・凝固系検査等を行った場合</div>
+          </div>
+        </div>
+        <div class="item-row" style="padding:7px 10px; border:1.5px solid var(--border); border-radius:8px; background:#fafbfc; min-height:unset;" onclick="toggleRow(this)">
+          <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="row-body">
+            <div class="row-title" style="font-size:12px;">判断料③ 検体検査判断料（生化学的検査Ⅰ）</div>
+            <div class="row-note">AST/ALT/Cr/血糖/TP/Alb/UA/BUN/Na/K/Cl/LDL等を行った場合</div>
+          </div>
+        </div>
+        <div class="item-row" style="padding:7px 10px; border:1.5px solid var(--border); border-radius:8px; background:#fafbfc; min-height:unset;" onclick="toggleRow(this)">
+          <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="row-body">
+            <div class="row-title" style="font-size:12px;">判断料④ 検体検査判断料（生化学的検査Ⅱ）</div>
+            <div class="row-note">HbA1c・TSH/FT3/FT4・BNP・ビタミンD・PTH・CRP等を行った場合</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-divider"></div>
+
+    <!-- その他検査 -->
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body"><div class="row-title">その他検査</div></div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="tag" onclick="selTag(this,'green')">尿検査</span>
+        <span class="tag" onclick="selTag(this,'green')">心電図</span>
+        <span class="tag" onclick="selTag(this,'green')">SpO₂</span>
+        <span class="tag" onclick="selTag(this,'green')">皮膚科学的検査</span>
+      </div>
+      <div class="sub-row">
+        <input type="text" placeholder="その他（自由記載）"
+          style="flex:1; border:1px solid var(--border); border-radius:6px; padding:4px 9px;
+                 font-size:11px; font-family:inherit; background:var(--bg); color:var(--text);
+                 outline:none; transition:border-color .15s;"
+          onfocus="this.style.borderColor='var(--green)'; this.style.background='white';"
+          onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== 6. 投薬 ========== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge badge-kusuri">投薬</span>
+    <span class="section-title">投薬・処方</span>
+  </div>
+  <div class="item-card">
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body"><div class="row-title">処方</div></div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="radio-tag active" data-group="shoho-umu" onclick="radioSelect(this)">あり</span>
+        <span class="radio-tag" data-group="shoho-umu" onclick="radioSelect(this)">なし</span>
+        <span class="tag" onclick="selTag(this,'purple')">病名確認</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 7. 訪看指示書 ========== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge badge-naika">訪問看護</span>
+    <span class="section-title">訪問看護指示書関連</span>
+  </div>
+  <div class="item-card">
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">訪問看護指示書</div>
+        <div class="row-note">月1回算定</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="radio-tag active" data-group="homon-kango" onclick="radioSelect(this)">あり</span>
+        <span class="radio-tag" data-group="homon-kango" onclick="radioSelect(this)">なし</span>
+      </div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">特別訪問看護指示書</div>
+        <div class="row-note">月2回まで。急性増悪・終末期等</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="radio-tag active" data-group="tokubetsu-kango" onclick="radioSelect(this)">あり</span>
+        <span class="radio-tag" data-group="tokubetsu-kango" onclick="radioSelect(this)">なし</span>
+      </div>
+      <div class="sub-row" style="flex-direction:column; align-items:flex-start; gap:5px;">
+        <span style="font-size:10px; font-weight:700; color:var(--sub);">発行理由・病名</span>
+        <input type="text" placeholder="例：肺炎による急性増悪、終末期の疼痛管理　など"
+          style="width:100%; border:1px solid var(--border); border-radius:6px; padding:5px 9px;
+                 font-size:11px; font-family:inherit; background:var(--bg); color:var(--text);
+                 outline:none; transition:border-color .15s;"
+          onfocus="this.style.borderColor='var(--orange)'; this.style.background='white';"
+          onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+        <span style="font-size:10px; font-weight:700; color:var(--sub);">指示期間</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <input type="date" style="border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-family:inherit; background:var(--bg); color:var(--text); outline:none;"
+            onfocus="this.style.borderColor='var(--orange)'; this.style.background='white';"
+            onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+          <span style="font-size:11px; color:var(--sub);">〜</span>
+          <input type="date" style="border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-family:inherit; background:var(--bg); color:var(--text); outline:none;"
+            onfocus="this.style.borderColor='var(--orange)'; this.style.background='white';"
+            onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 9. 病名・レセプト ========== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge badge-resepto">レセプト</span>
+    <span class="section-title">病名・レセプト確認</span>
+  </div>
+  <div class="item-card">
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">病名チェック</div>
+        <div class="row-note">処置・管理料・検査すべての病名が揃っているか</div>
+      </div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body"><div class="row-title">医科レセプト確認</div></div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="tag" onclick="selTag(this,'orange')">レセコメント</span>
+        <span class="tag" onclick="selTag(this,'orange')">選択式コメント</span>
+        <span class="tag" onclick="selTag(this,'orange')">摘要欄記載確認</span>
+      </div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">介護レセプト確認</div>
+        <div class="row-note">居宅療養管理指導の算定月のみ</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 10. 事務 ========== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge badge-jimu">事務</span>
+    <span class="section-title">事務・連絡メモ</span>
+  </div>
+  <div class="item-card">
+    <div style="padding: 12px 14px;">
+      <textarea id="jimu-memo" placeholder="ケアマネへの報告内容、薬局・訪看STへの連絡事項、家族説明の内容、院内申し送りなど、自由に記載してください。"
+        style="width:100%; min-height:100px; border:1.5px solid var(--border); border-radius:7px;
+               padding:9px 11px; font-size:12px; font-family:inherit; color:var(--text);
+               background:var(--bg); resize:vertical; outline:none; line-height:1.7;
+               transition:border-color .15s;"
+        onfocus="this.style.borderColor='var(--blue)'; this.style.background='white';"
+        onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- ========== エクスポート ========== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge badge-jimu">出力</span>
+    <span class="section-title">スプレッドシートへ送信</span>
+  </div>
+  <div class="item-card">
+    <div style="padding:14px 16px; display:flex; flex-direction:column; gap:10px;">
+
+      <!-- GAS URL -->
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <span style="font-size:11px; font-weight:700; color:var(--sub);">GAS Web App URL</span>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <input type="text" id="gas-url"
+            placeholder="https://script.google.com/macros/s/xxxxx/exec"
+            style="flex:1; min-width:200px; border:1.5px solid var(--border); border-radius:6px;
+                   padding:6px 10px; font-size:11px; font-family:inherit; background:var(--bg);
+                   color:var(--text); outline:none; transition:border-color .15s;"
+            onfocus="this.style.borderColor='var(--blue)'; this.style.background='white';"
+            onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+          <button onclick="saveGasUrl()"
+            style="padding:6px 14px; font-size:11px; font-family:inherit; font-weight:600;
+                   background:var(--blue-light); color:var(--blue); border:1.5px solid #bfdbfe;
+                   border-radius:6px; cursor:pointer; white-space:nowrap;">保存</button>
+        </div>
+        <div id="gas-url-status" style="font-size:10px; color:var(--sub);"></div>
+      </div>
+
+      <!-- 送信ボタン -->
+      <button onclick="exportData()" id="export-btn"
+        style="padding:11px; font-size:13px; font-family:inherit; font-weight:700;
+               background:var(--green); color:white; border:none; border-radius:8px;
+               cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px;">
+        <span id="export-icon">📤</span><span id="export-label">スプレッドシートへ送信</span>
+      </button>
+      <div id="export-status" style="font-size:11px; color:var(--sub); text-align:center; display:none;"></div>
+
+    </div>
+  </div>
+</div>
+
+<button class="reset-btn" onclick="resetAll()">⟳ すべてリセット</button>
+
+<script>
+// ─── 日付入力欄 追加（共通） ───
+function addDateTo(containerId, inputClass) {
+  const container = document.getElementById(containerId);
+  const accentMap = {
+    'visit-dates':   'var(--blue)',
+    'oushin-dates':  'var(--blue)',
+    'seishin-dates': 'var(--purple)',
+  };
+  const accent = accentMap[containerId] || 'var(--blue)';
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex; align-items:center; gap:4px;';
+  const input = document.createElement('input');
+  input.type = 'date';
+  input.className = inputClass;
+  input.style.cssText = 'border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-family:inherit; background:var(--bg); color:var(--text); outline:none;';
+  input.onfocus = () => { input.style.borderColor = accent; input.style.background = 'white'; };
+  input.onblur  = () => { input.style.borderColor = 'var(--border)'; input.style.background = 'var(--bg)'; };
+  const rm = document.createElement('span');
+  rm.textContent = '✕';
+  rm.style.cssText = 'font-size:12px; color:#9ca3af; cursor:pointer; padding:2px;';
+  rm.onmouseenter = () => rm.style.color = 'var(--red)';
+  rm.onmouseleave = () => rm.style.color = '#9ca3af';
+  rm.onclick = () => wrap.remove();
+  wrap.appendChild(input); wrap.appendChild(rm);
+  container.appendChild(wrap);
+}
+
+// 旧関数の互換エイリアス
+function addVisitDate() { addDateTo('visit-dates','visit-date-input'); }
+
+// ─── データ収集 ───
+function collectData() {
+  const checked = [...document.querySelectorAll('.item-row.checked .row-title')]
+    .map(el => el.textContent.trim()).join('、');
+  const sousouEl = document.querySelector('#sousou-grid .sousou-item.selected .sousou-title');
+  const getDates = cls => [...document.querySelectorAll(`.${cls}`)].map(i=>i.value).filter(v=>v).join('、');
+  return {
+    timestamp:    new Date().toLocaleString('ja-JP'),
+    patient:      document.getElementById('meta-patient').value,
+    visitDoctor:  document.getElementById('meta-doctor-name').value,
+    receipt:      document.getElementById('meta-receipt').value,
+    visitDates:   getDates('visit-date-input'),
+    oushinDates:  getDates('oushin-date-input'),
+    seishinDates: getDates('seishin-date-input'),
+    checkedItems: checked,
+    sousouKu:     sousouEl ? sousouEl.textContent.trim() : '未選択',
+    saketsuMode:  saketsuMode === 'doc' ? '医師採血' : '看護師採血',
+    kenketsuItems:[...document.querySelectorAll('.kb-tag.active')].map(e=>e.textContent.trim()).join('、'),
+    byomei:       [...addedByomei].join('、'),
+    memo:         document.getElementById('jimu-memo').value,
+  };
+}
+
+// ─── GAS URL 保存・読み込み ───
+function saveGasUrl() {
+  const url = document.getElementById('gas-url').value.trim();
+  localStorage.setItem('gas_url', url);
+  const st = document.getElementById('gas-url-status');
+  if (url) {
+    st.textContent = '✅ 保存しました';
+    st.style.color = 'var(--green)';
+    document.getElementById('export-label').textContent = 'スプレッドシートへ送信';
+    document.getElementById('export-icon').textContent = '📤';
+  } else {
+    st.textContent = 'URLが未入力のため、CSVダウンロードに切り替わります';
+    st.style.color = 'var(--sub)';
+    document.getElementById('export-label').textContent = 'CSVダウンロード';
+    document.getElementById('export-icon').textContent = '⬇️';
+  }
+  setTimeout(() => { st.textContent = url ? '✅ GAS URL設定済み' : ''; }, 2500);
+}
+
+function showStatus(msg, color) {
+  const el = document.getElementById('export-status');
+  el.textContent = msg;
+  el.style.color = color || 'var(--sub)';
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+// ─── エクスポート（GAS送信 or CSVフォールバック） ───
+async function exportData() {
+  const data   = collectData();
+  const gasUrl = (localStorage.getItem('gas_url') || '').trim();
+  const btn    = document.getElementById('export-btn');
+  btn.style.opacity = '0.6';
+  btn.disabled = true;
+
+  if (gasUrl) {
+    try {
+      showStatus('📡 送信中...', 'var(--sub)');
+      await fetch(gasUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      showStatus('✅ スプレッドシートへ送信しました！', 'var(--green)');
+    } catch(e) {
+      showStatus('❌ 送信に失敗しました。GAS URLを確認してください。', 'var(--red)');
+    }
+  } else {
+    // GAS未設定時はCSVダウンロード
+    const headers = ['送信日時','患者名','訪問医','レセプト担当','訪問診療日','往診日','在宅精神療法実施日',
+                     'チェック済み項目','施設総管区分','採血実施者','採血項目','疑い病名','事務メモ'];
+    const vals    = [data.timestamp, data.patient, data.visitDoctor, data.receipt,
+                     data.visitDates, data.oushinDates, data.seishinDates,
+                     data.checkedItems, data.sousouKu, data.saketsuMode,
+                     data.kenketsuItems, data.byomei, data.memo];
+    const esc = v => `"${(v||'').replace(/"/g,'""')}"`;
+    const csv = '\uFEFF' + headers.map(esc).join(',') + '\n' + vals.map(esc).join(',');
+    const a   = document.createElement('a');
+    a.href    = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+    a.download= `訪問診療_${data.patient||'患者'}_${new Date().toLocaleDateString('ja-JP')}.csv`;
+    a.click();
+    showStatus('⬇️ CSVをダウンロードしました', 'var(--blue)');
+  }
+
+  btn.style.opacity = '1';
+  btn.disabled = false;
+}
+
+// ─── init ───
+(function() {
+  const saved = localStorage.getItem('gas_url') || '';
+  if (saved) {
+    document.getElementById('gas-url').value = saved;
+    document.getElementById('gas-url-status').textContent = '✅ GAS URL設定済み';
+    document.getElementById('gas-url-status').style.color = 'var(--green)';
+    document.getElementById('export-label').textContent = 'スプレッドシートへ送信';
+    document.getElementById('export-icon').textContent = '📤';
+  } else {
+    document.getElementById('export-label').textContent = 'CSVダウンロード';
+    document.getElementById('export-icon').textContent = '⬇️';
+  }
+})();
+
+// ─── 併算定確認チェック ───
+function toggleHcb(rowEl) {
+  const hcb = rowEl.querySelector('.hcb');
+  hcb.classList.toggle('on');
+}
+
+// ─── row toggle ───
+function toggleRow(rowEl) {
+  rowEl.classList.toggle('checked');
+}
+
+// ─── tag (multi) ───
+function selTag(el, color) {
+  const cls = 'sel-'+color;
+  const all = ['sel-blue','sel-green','sel-purple','sel-orange','sel-teal'];
+  const on  = el.classList.contains(cls);
+  all.forEach(c => el.classList.remove(c));
+  if (!on) el.classList.add(cls);
+}
+
+// ─── radio tag ───
+function radioSelect(el) {
+  const g = el.getAttribute('data-group');
+  document.querySelectorAll(`.radio-tag[data-group="${g}"]`).forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ─── 施設総管 ①〜⑤ ───
+function selectSousou(el, num) {
+  document.querySelectorAll('#sousou-grid .sousou-item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ─── 採血 医師/看護師 ───
+let saketsuMode = 'doc';
+function setSaketsu(mode) {
+  saketsuMode = mode;
+  document.getElementById('saketsu-doc').className = 'saketsu-btn' + (mode==='doc'?' active-doc':'');
+  document.getElementById('saketsu-ns').className  = 'saketsu-btn' + (mode==='ns'? ' active-ns':'');
+  const note = document.getElementById('saketsu-note');
+  if (mode === 'doc') {
+    note.innerHTML = '✅ <b>採血料を医療費として算定可</b>。スピッツ準備・検体ラベル貼付・依頼書確認を行うこと。';
+  } else {
+    note.innerHTML = '⚠️ <b>医療費として採血料の算定不可</b>（訪問看護ステーションの業務範囲）。スピッツ・依頼書は訪看STへ事前確認。';
+  }
+}
+
+// ─── 採血項目 → 疑い病名 ───
+const addedByomei = new Set();
+
+function toggleKb(el) {
+  el.classList.toggle('active');
+  renderByomei();
+}
+
+function renderByomei() {
+  const suggested = new Map();
+  document.querySelectorAll('.kb-tag.active').forEach(el => {
+    el.getAttribute('data-byomei').split(',').forEach(b => {
+      if (!suggested.has(b)) suggested.set(b, []);
+      suggested.get(b).push(el.textContent.trim());
+    });
+  });
+  const box  = document.getElementById('byomei-box');
+  const list = document.getElementById('byomei-list');
+  if (suggested.size === 0) { box.classList.remove('visible'); return; }
+  box.classList.add('visible');
+  list.innerHTML = '';
+  suggested.forEach((sources, byomei) => {
+    const chip = document.createElement('span');
+    chip.className = 'byomei-chip' + (addedByomei.has(byomei) ? ' added' : '');
+    chip.innerHTML = `<span class="chip-icon">${addedByomei.has(byomei)?'✓':'+'}</span>${byomei}`;
+    chip.onclick = () => {
+      addedByomei.has(byomei) ? addedByomei.delete(byomei) : addedByomei.add(byomei);
+      renderByomei(); renderAdded();
+    };
+    list.appendChild(chip);
+  });
+}
+
+function renderAdded() {
+  const area = document.getElementById('byomei-added');
+  area.innerHTML = '';
+  addedByomei.forEach(b => {
+    const chip = document.createElement('span');
+    chip.className = 'added-byomei';
+    chip.innerHTML = `${b}<span class="rm" title="削除" onclick="removeByomei('${b}')">✕</span>`;
+    area.appendChild(chip);
+  });
+}
+
+function removeByomei(b) {
+  addedByomei.delete(b);
+  renderByomei(); renderAdded();
+}
+
+// ─── reset ───
+function resetAll() {
+  if (!confirm('すべてのチェックをリセットしますか？')) return;
+  document.querySelectorAll('.item-row').forEach(r => r.classList.remove('checked'));
+  document.querySelectorAll('.tag').forEach(t => {
+    ['sel-blue','sel-green','sel-purple','sel-orange','sel-teal'].forEach(c => t.classList.remove(c));
+  });
+  document.querySelectorAll('.kb-tag').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.hcb').forEach(h => h.classList.remove('on'));
+  document.querySelectorAll('.sousou-item').forEach(i => i.classList.remove('selected'));
+  document.querySelectorAll('.inline-in').forEach(i => i.value = '');
+  document.querySelectorAll('input[type="text"], input[type="date"]').forEach(i => i.value = '');
+  document.getElementById('jimu-memo').value = '';
+  document.getElementById('shorisumi').classList.remove('on');
+  // 追加した訪問日入力欄を初期の1個だけに戻す
+  [['visit-dates','visit-date-input'],['oushin-dates','oushin-date-input'],['seishin-dates','seishin-date-input']].forEach(([id, cls]) => {
+    const c = document.getElementById(id);
+    if (!c) return;
+    [...c.children].forEach((el, i) => { if (i > 0) el.remove(); });
+    const first = c.querySelector(`.${cls}`);
+    if (first) first.value = '';
+  });
+  addedByomei.clear();
+  renderByomei(); renderAdded();
+  setSaketsu('doc');
+}
+</script>
+</body>
+</html>
