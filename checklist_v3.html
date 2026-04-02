@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -490,14 +489,6 @@ body {
     <h1>訪問診療 算定チェックリスト</h1>
     <p>内科・精神科在宅対応版</p>
   </div>
-  <div class="doctor-toggle">
-    <button class="doctor-btn active-naika" id="btn-naika" onclick="setDoctor('naika')">
-      <span class="dot"></span>内科医が訪問
-    </button>
-    <button class="doctor-btn" id="btn-seishin" onclick="setDoctor('seishin')">
-      <span class="dot"></span>精神科医が訪問
-    </button>
-  </div>
 </div>
 
 <!-- META -->
@@ -510,13 +501,14 @@ body {
     <span class="meta-label">訪問医</span>
     <input class="meta-input w-name" type="text" id="meta-doctor-name" placeholder="Dr.　　　　　">
   </div>
-
+  <div class="meta-row">
+    <span class="meta-label">レセプト担当</span>
+    <input class="meta-input w-name" type="text" id="meta-receipt" placeholder="担当者名">
+  </div>
 </div>
 
-<!-- PROGRESS -->
+<!-- 処理済 -->
 <div class="progress-card">
-  <span class="progress-text" id="prog-text">0 / 0 完了</span>
-  <div class="progress-outer"><div class="progress-inner" id="prog-bar"></div></div>
   <div class="shorisumi-wrap">
     <span class="shorisumi-label">処理済</span>
     <div class="shorisumi-cb" id="shorisumi" onclick="this.classList.toggle('on')">
@@ -553,6 +545,14 @@ body {
         <span class="radio-tag" data-group="homon-build" onclick="radioSelect(this)">同一建物2〜9人</span>
         <span class="radio-tag" data-group="homon-build" onclick="radioSelect(this)">同一建物10人以上</span>
       </div>
+      <!-- 訪問日付 複数入力 -->
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <div style="font-size:10px; font-weight:700; color:var(--sub); letter-spacing:.05em;">訪問日（複数入力可）</div>
+        <div id="visit-dates" style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;">
+          <input type="date" class="visit-date-input" style="border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-family:inherit; background:var(--bg); color:var(--text); outline:none; transition:border-color .15s;" onfocus="this.style.borderColor='var(--blue)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+        </div>
+        <button onclick="addVisitDate()" style="align-self:flex-start; padding:3px 10px; font-size:11px; font-family:inherit; font-weight:600; background:var(--blue-light); color:var(--blue); border:1.5px solid #bfdbfe; border-radius:6px; cursor:pointer;">＋ 日付を追加</button>
+      </div>
     </div>
 
     <div class="card-divider"></div>
@@ -584,6 +584,77 @@ body {
         <span class="radio-tag" data-group="oushin-jikan" onclick="radioSelect(this)">時間外</span>
         <span class="radio-tag" data-group="oushin-jikan" onclick="radioSelect(this)">休日</span>
         <span class="radio-tag" data-group="oushin-jikan" onclick="radioSelect(this)">深夜</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <div style="font-size:10px; font-weight:700; color:var(--sub); letter-spacing:.05em;">往診日（複数入力可）</div>
+        <div id="oushin-dates" style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;">
+          <input type="date" class="oushin-date-input" style="border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-family:inherit; background:var(--bg); color:var(--text); outline:none;" onfocus="this.style.borderColor='var(--blue)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+        </div>
+        <button onclick="addDateTo('oushin-dates','oushin-date-input')" style="align-self:flex-start; padding:3px 10px; font-size:11px; font-family:inherit; font-weight:600; background:var(--blue-light); color:var(--blue); border:1.5px solid #bfdbfe; border-radius:6px; cursor:pointer;">＋ 日付を追加</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== 同一患家 ========== -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-badge badge-common">確認</span>
+    <span class="section-title">同一患家の算定要件</span>
+  </div>
+  <div class="item-card">
+
+    <!-- 往診料：2人目以降は算定不可 -->
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">往診料：同一患家2人目以降は算定不可</div>
+        <div class="row-note">同一患家への往診は最初の1人のみ算定可</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="radio-tag active" data-group="oushin-kanja" onclick="radioSelect(this)">1人目のみ（往診料算定）</span>
+        <span class="radio-tag" data-group="oushin-kanja" onclick="radioSelect(this)">2人目以降あり（往診料算定不可）</span>
+      </div>
+    </div>
+
+    <div class="card-divider"></div>
+
+    <!-- 同一日・同一患家への複数回訪問 -->
+    <div class="item-row" onclick="toggleRow(this)">
+      <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="row-body">
+        <div class="row-title">同一日・同一患家への複数回訪問</div>
+        <div class="row-note">2回目以降の訪問診療料は算定不可。やむを得ない場合は往診料で対応</div>
+      </div>
+    </div>
+    <div class="sub-area">
+      <div class="sub-row">
+        <span class="radio-tag active" data-group="fukusukai" onclick="radioSelect(this)">1回のみ</span>
+        <span class="radio-tag" data-group="fukusukai" onclick="radioSelect(this)">複数回訪問あり→往診料で算定</span>
+      </div>
+    </div>
+
+    <div class="card-divider"></div>
+
+    <!-- 確認チェック -->
+    <div style="padding:8px 14px 12px;">
+      <div style="font-size:10px; font-weight:700; color:var(--sub); letter-spacing:.05em; margin-bottom:6px;">📋 確認チェック</div>
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label">往診料は同一患家で最初の1人のみ算定し、2人目以降は算定していない</span>
+        </div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label">同一日に同一患家へ2回以上の訪問診療料を算定していない</span>
+        </div>
+        <div class="heisan-chk-row" onclick="toggleHcb(this)">
+          <div class="hcb"><svg width="9" height="7" viewBox="0 0 9 7"><polyline points="1,3.5 3,5.5 8,1" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <span class="hcb-label">カルテに患者ごとの訪問記録が個別に記載されている</span>
+        </div>
       </div>
     </div>
 
@@ -711,8 +782,8 @@ body {
   </div>
 </div>
 
-<!-- ========== 3. 精神科医のみ ========== -->
-<div class="section seishin-only-section" id="seishin-section">
+<!-- ========== 3. 在宅精神療法 ========== -->
+<div class="section" id="seishin-section">
   <div class="section-header">
     <span class="section-badge badge-seishin">精神科医のみ</span>
     <span class="section-title">精神科医が訪問した場合のみ算定可</span>
@@ -739,6 +810,13 @@ body {
       <div class="sub-row">
         <span class="tag" onclick="selTag(this,'purple')">措置入院歴あり加算</span>
         <span class="tag" onclick="selTag(this,'purple')">重症患者加算</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <div style="font-size:10px; font-weight:700; color:var(--sub); letter-spacing:.05em;">実施日（複数入力可）</div>
+        <div id="seishin-dates" style="display:flex; flex-wrap:wrap; gap:5px; align-items:center;">
+          <input type="date" class="seishin-date-input" style="border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-family:inherit; background:var(--bg); color:var(--text); outline:none;" onfocus="this.style.borderColor='var(--purple)'; this.style.background='white';" onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+        </div>
+        <button onclick="addDateTo('seishin-dates','seishin-date-input')" style="align-self:flex-start; padding:3px 10px; font-size:11px; font-family:inherit; font-weight:600; background:var(--purple-light); color:var(--purple); border:1.5px solid #ddd6fe; border-radius:6px; cursor:pointer;">＋ 日付を追加</button>
       </div>
     </div>
 
@@ -989,7 +1067,40 @@ body {
     <!-- 追加済み病名 -->
     <div class="byomei-added-area" id="byomei-added"></div>
 
-
+    <!-- 検体検査判断料 -->
+    <div style="padding: 0 14px 12px 42px;">
+      <div style="font-size:10px; font-weight:700; color:var(--sub); letter-spacing:.05em; margin-bottom:6px;">検体検査判断料（月1回・該当するものをチェック）</div>
+      <div style="display:flex; flex-direction:column; gap:5px;">
+        <div class="item-row" style="padding:7px 10px; border:1.5px solid var(--border); border-radius:8px; background:#fafbfc; min-height:unset;" onclick="toggleRow(this)">
+          <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="row-body">
+            <div class="row-title" style="font-size:12px;">判断料① 検体検査判断料（尿・糞便等）</div>
+            <div class="row-note">尿一般、糞便、喀痰等の検査を行った場合</div>
+          </div>
+        </div>
+        <div class="item-row" style="padding:7px 10px; border:1.5px solid var(--border); border-radius:8px; background:#fafbfc; min-height:unset;" onclick="toggleRow(this)">
+          <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="row-body">
+            <div class="row-title" style="font-size:12px;">判断料② 検体検査判断料（血液学的検査）</div>
+            <div class="row-note">CBC・PT-INR・凝固系検査等を行った場合</div>
+          </div>
+        </div>
+        <div class="item-row" style="padding:7px 10px; border:1.5px solid var(--border); border-radius:8px; background:#fafbfc; min-height:unset;" onclick="toggleRow(this)">
+          <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="row-body">
+            <div class="row-title" style="font-size:12px;">判断料③ 検体検査判断料（生化学的検査Ⅰ）</div>
+            <div class="row-note">AST/ALT/Cr/血糖/TP/Alb/UA/BUN/Na/K/Cl/LDL等を行った場合</div>
+          </div>
+        </div>
+        <div class="item-row" style="padding:7px 10px; border:1.5px solid var(--border); border-radius:8px; background:#fafbfc; min-height:unset;" onclick="toggleRow(this)">
+          <div class="cb"><svg width="10" height="8" viewBox="0 0 10 8"><polyline points="1,4 3.5,6.5 9,1" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="row-body">
+            <div class="row-title" style="font-size:12px;">判断料④ 検体検査判断料（生化学的検査Ⅱ）</div>
+            <div class="row-note">HbA1c・TSH/FT3/FT4・BNP・ビタミンD・PTH・CRP等を行った場合</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="card-divider"></div>
 
@@ -1072,6 +1183,25 @@ body {
         <span class="radio-tag active" data-group="tokubetsu-kango" onclick="radioSelect(this)">あり</span>
         <span class="radio-tag" data-group="tokubetsu-kango" onclick="radioSelect(this)">なし</span>
       </div>
+      <div class="sub-row" style="flex-direction:column; align-items:flex-start; gap:5px;">
+        <span style="font-size:10px; font-weight:700; color:var(--sub);">発行理由・病名</span>
+        <input type="text" placeholder="例：肺炎による急性増悪、終末期の疼痛管理　など"
+          style="width:100%; border:1px solid var(--border); border-radius:6px; padding:5px 9px;
+                 font-size:11px; font-family:inherit; background:var(--bg); color:var(--text);
+                 outline:none; transition:border-color .15s;"
+          onfocus="this.style.borderColor='var(--orange)'; this.style.background='white';"
+          onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+        <span style="font-size:10px; font-weight:700; color:var(--sub);">指示期間</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <input type="date" style="border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-family:inherit; background:var(--bg); color:var(--text); outline:none;"
+            onfocus="this.style.borderColor='var(--orange)'; this.style.background='white';"
+            onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+          <span style="font-size:11px; color:var(--sub);">〜</span>
+          <input type="date" style="border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-family:inherit; background:var(--bg); color:var(--text); outline:none;"
+            onfocus="this.style.borderColor='var(--orange)'; this.style.background='white';"
+            onblur="this.style.borderColor='var(--border)'; this.style.background='var(--bg)';">
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1136,22 +1266,26 @@ body {
 <div class="section">
   <div class="section-header">
     <span class="section-badge badge-jimu">出力</span>
-    <span class="section-title">CSVダウンロード</span>
+    <span class="section-title">スプレッドシートへ送信</span>
   </div>
   <div class="item-card">
-    <div style="padding:14px 16px; display:flex; flex-direction:column; gap:8px;">
-      <p style="font-size:11px; color:var(--sub); line-height:1.7;">
-        チェック内容をCSVファイルとして保存します。Googleスプレッドシートで開いてそのまま記録として使えます。<br>
-        ダウンロード後、スプレッドシートの「ファイル → インポート → アップロード」でシートに追記できます。
-      </p>
-      <button onclick="exportCsv()" id="export-btn"
+    <div style="padding:14px 16px; display:flex; flex-direction:column; gap:10px;">
+
+      <!-- GAS URL（固定済み・非表示） -->
+      <div style="display:none;">
+        <input type="text" id="gas-url">
+        <div id="gas-url-status"></div>
+      </div>
+
+      <!-- 送信ボタン -->
+      <button onclick="exportData()" id="export-btn"
         style="padding:11px; font-size:13px; font-family:inherit; font-weight:700;
                background:var(--green); color:white; border:none; border-radius:8px;
-               cursor:pointer; transition:opacity .15s; display:flex; align-items:center;
-               justify-content:center; gap:7px;">
-        ⬇️　CSVダウンロード
+               cursor:pointer; display:flex; align-items:center; justify-content:center; gap:7px;">
+        <span id="export-icon">📤</span><span id="export-label">スプレッドシートへ送信</span>
       </button>
       <div id="export-status" style="font-size:11px; color:var(--sub); text-align:center; display:none;"></div>
+
     </div>
   </div>
 </div>
@@ -1159,15 +1293,50 @@ body {
 <button class="reset-btn" onclick="resetAll()">⟳ すべてリセット</button>
 
 <script>
+// ─── 日付入力欄 追加（共通） ───
+function addDateTo(containerId, inputClass) {
+  const container = document.getElementById(containerId);
+  const accentMap = {
+    'visit-dates':   'var(--blue)',
+    'oushin-dates':  'var(--blue)',
+    'seishin-dates': 'var(--purple)',
+  };
+  const accent = accentMap[containerId] || 'var(--blue)';
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex; align-items:center; gap:4px;';
+  const input = document.createElement('input');
+  input.type = 'date';
+  input.className = inputClass;
+  input.style.cssText = 'border:1px solid var(--border); border-radius:6px; padding:4px 8px; font-size:11px; font-family:inherit; background:var(--bg); color:var(--text); outline:none;';
+  input.onfocus = () => { input.style.borderColor = accent; input.style.background = 'white'; };
+  input.onblur  = () => { input.style.borderColor = 'var(--border)'; input.style.background = 'var(--bg)'; };
+  const rm = document.createElement('span');
+  rm.textContent = '✕';
+  rm.style.cssText = 'font-size:12px; color:#9ca3af; cursor:pointer; padding:2px;';
+  rm.onmouseenter = () => rm.style.color = 'var(--red)';
+  rm.onmouseleave = () => rm.style.color = '#9ca3af';
+  rm.onclick = () => wrap.remove();
+  wrap.appendChild(input); wrap.appendChild(rm);
+  container.appendChild(wrap);
+}
+
+// 旧関数の互換エイリアス
+function addVisitDate() { addDateTo('visit-dates','visit-date-input'); }
+
 // ─── データ収集 ───
 function collectData() {
   const checked = [...document.querySelectorAll('.item-row.checked .row-title')]
     .map(el => el.textContent.trim()).join('、');
   const sousouEl = document.querySelector('#sousou-grid .sousou-item.selected .sousou-title');
+  const getDates = cls => [...document.querySelectorAll(`.${cls}`)].map(i=>i.value).filter(v=>v).join('、');
   return {
     timestamp:    new Date().toLocaleString('ja-JP'),
     patient:      document.getElementById('meta-patient').value,
     visitDoctor:  document.getElementById('meta-doctor-name').value,
+    receipt:      document.getElementById('meta-receipt').value,
+    visitDates:   getDates('visit-date-input'),
+    oushinDates:  getDates('oushin-date-input'),
+    seishinDates: getDates('seishin-date-input'),
     checkedItems: checked,
     sousouKu:     sousouEl ? sousouEl.textContent.trim() : '未選択',
     saketsuMode:  saketsuMode === 'doc' ? '医師採血' : '看護師採血',
@@ -1177,25 +1346,65 @@ function collectData() {
   };
 }
 
-// ─── CSV ダウンロード ───
-function exportCsv() {
-  const data = collectData();
-  const headers = ['送信日時','患者名','訪問医','チェック済み項目','施設総管区分',
-                   '採血実施者','採血項目','疑い病名','事務メモ'];
-  const vals    = [data.timestamp, data.patient, data.visitDoctor, data.checkedItems,
-                   data.sousouKu, data.saketsuMode, data.kenketsuItems, data.byomei, data.memo];
-  const esc = v => `"${(v||'').replace(/"/g,'""')}"`;
-  const csv = '\uFEFF' + headers.map(esc).join(',') + '\n' + vals.map(esc).join(',');
-  const a   = document.createElement('a');
-  a.href    = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-  a.download= `訪問診療_${data.patient||'患者'}_${new Date().toLocaleDateString('ja-JP')}.csv`;
-  a.click();
-  const st = document.getElementById('export-status');
-  st.textContent = `⬇️ ${a.download} をダウンロードしました`;
-  st.style.color = 'var(--green)';
-  st.style.display = 'block';
-  setTimeout(() => { st.style.display = 'none'; }, 4000);
+// ─── GAS URL（固定） ───
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxV9BUmCjlqMCu0gz8yTaIVMO1MdZlYqZEiiD3nI2ZIYGimYv0RcWNQCRENEynBCgHu7g/exec';
+
+// ─── GAS URL 保存・読み込み ───
+function saveGasUrl() {
+  const url = document.getElementById('gas-url').value.trim();
+  localStorage.setItem('gas_url', url);
+  const st = document.getElementById('gas-url-status');
+  if (url) {
+    st.textContent = '✅ 保存しました';
+    st.style.color = 'var(--green)';
+    document.getElementById('export-label').textContent = 'スプレッドシートへ送信';
+    document.getElementById('export-icon').textContent = '📤';
+  } else {
+    st.textContent = 'URLが未入力のため、CSVダウンロードに切り替わります';
+    st.style.color = 'var(--sub)';
+    document.getElementById('export-label').textContent = 'CSVダウンロード';
+    document.getElementById('export-icon').textContent = '⬇️';
+  }
+  setTimeout(() => { st.textContent = url ? '✅ GAS URL設定済み' : ''; }, 2500);
 }
+
+function showStatus(msg, color) {
+  const el = document.getElementById('export-status');
+  el.textContent = msg;
+  el.style.color = color || 'var(--sub)';
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+// ─── エクスポート ───
+async function exportData() {
+  const data = collectData();
+  const btn  = document.getElementById('export-btn');
+  btn.style.opacity = '0.6';
+  btn.disabled = true;
+
+  try {
+    showStatus('📡 送信中...', 'var(--sub)');
+    await fetch(GAS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(data),
+    });
+    showStatus('✅ スプレッドシートへ送信しました！', 'var(--green)');
+  } catch(e) {
+    showStatus('❌ 送信に失敗しました。', 'var(--red)');
+  }
+
+  btn.style.opacity = '1';
+  btn.disabled = false;
+}
+
+// ─── init ───
+(function() {
+  document.getElementById('export-label').textContent = 'スプレッドシートへ送信';
+  document.getElementById('export-icon').textContent = '📤';
+})();
 
 // ─── 併算定確認チェック ───
 function toggleHcb(rowEl) {
@@ -1203,20 +1412,9 @@ function toggleHcb(rowEl) {
   hcb.classList.toggle('on');
 }
 
-// ─── doctor ───
-let doctor = 'naika';
-function setDoctor(d) {
-  doctor = d;
-  document.getElementById('btn-naika').className   = 'doctor-btn' + (d==='naika'?'  active-naika':'');
-  document.getElementById('btn-seishin').className = 'doctor-btn' + (d==='seishin'?' active-seishin':'');
-  document.getElementById('seishin-section').classList.toggle('active', d==='seishin');
-  updateProgress();
-}
-
 // ─── row toggle ───
 function toggleRow(rowEl) {
   rowEl.classList.toggle('checked');
-  updateProgress();
 }
 
 // ─── tag (multi) ───
@@ -1264,39 +1462,25 @@ function toggleKb(el) {
 }
 
 function renderByomei() {
-  // collect all byomei from active tags
-  const suggested = new Map(); // byomei → source kb tags
+  const suggested = new Map();
   document.querySelectorAll('.kb-tag.active').forEach(el => {
-    const byomeiList = el.getAttribute('data-byomei').split(',');
-    byomeiList.forEach(b => {
+    el.getAttribute('data-byomei').split(',').forEach(b => {
       if (!suggested.has(b)) suggested.set(b, []);
       suggested.get(b).push(el.textContent.trim());
     });
   });
-
   const box  = document.getElementById('byomei-box');
   const list = document.getElementById('byomei-list');
-
-  if (suggested.size === 0) {
-    box.classList.remove('visible');
-    return;
-  }
+  if (suggested.size === 0) { box.classList.remove('visible'); return; }
   box.classList.add('visible');
-
   list.innerHTML = '';
   suggested.forEach((sources, byomei) => {
     const chip = document.createElement('span');
     chip.className = 'byomei-chip' + (addedByomei.has(byomei) ? ' added' : '');
     chip.innerHTML = `<span class="chip-icon">${addedByomei.has(byomei)?'✓':'+'}</span>${byomei}`;
-    chip.title = '由来：' + sources.join('、');
     chip.onclick = () => {
-      if (addedByomei.has(byomei)) {
-        addedByomei.delete(byomei);
-      } else {
-        addedByomei.add(byomei);
-      }
-      renderByomei();
-      renderAdded();
+      addedByomei.has(byomei) ? addedByomei.delete(byomei) : addedByomei.add(byomei);
+      renderByomei(); renderAdded();
     };
     list.appendChild(chip);
   });
@@ -1315,21 +1499,7 @@ function renderAdded() {
 
 function removeByomei(b) {
   addedByomei.delete(b);
-  renderByomei();
-  renderAdded();
-}
-
-// ─── progress ───
-function updateProgress() {
-  const allRows = [...document.querySelectorAll('.item-row')];
-  const active  = allRows.filter(r => {
-    const s = r.closest('.seishin-only-section');
-    return !(s && doctor==='naika');
-  });
-  const total = active.length;
-  const done  = active.filter(r => r.classList.contains('checked')).length;
-  document.getElementById('prog-text').textContent = `${done} / ${total} 完了`;
-  document.getElementById('prog-bar').style.width  = total > 0 ? `${done/total*100}%` : '0%';
+  renderByomei(); renderAdded();
 }
 
 // ─── reset ───
@@ -1343,21 +1513,21 @@ function resetAll() {
   document.querySelectorAll('.hcb').forEach(h => h.classList.remove('on'));
   document.querySelectorAll('.sousou-item').forEach(i => i.classList.remove('selected'));
   document.querySelectorAll('.inline-in').forEach(i => i.value = '');
-  ['meta-patient','meta-doctor-name'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
+  document.querySelectorAll('input[type="text"], input[type="date"]').forEach(i => i.value = '');
   document.getElementById('jimu-memo').value = '';
   document.getElementById('shorisumi').classList.remove('on');
+  // 追加した訪問日入力欄を初期の1個だけに戻す
+  [['visit-dates','visit-date-input'],['oushin-dates','oushin-date-input'],['seishin-dates','seishin-date-input']].forEach(([id, cls]) => {
+    const c = document.getElementById(id);
+    if (!c) return;
+    [...c.children].forEach((el, i) => { if (i > 0) el.remove(); });
+    const first = c.querySelector(`.${cls}`);
+    if (first) first.value = '';
+  });
   addedByomei.clear();
-  renderByomei();
-  renderAdded();
+  renderByomei(); renderAdded();
   setSaketsu('doc');
-  updateProgress();
 }
-
-// init
-setDoctor('naika');
 </script>
 </body>
 </html>
