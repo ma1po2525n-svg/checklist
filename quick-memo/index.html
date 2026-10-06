@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="メモ">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>クイックメモ</title>
+<style>
+  :root { --bg:#fff; --fg:#111; --muted:#777; --line:#e3e3e3; --accent:#111; --ok:#1a7f37; --err:#c62828; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#111; --fg:#f2f2f2; --muted:#999; --line:#333; --accent:#f2f2f2; } }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--bg); color: var(--fg); font: 17px/1.5 -apple-system, "Hiragino Sans", sans-serif;
+         display: flex; flex-direction: column; padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom); }
+  header { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; color: var(--muted); font-size: 14px; }
+  button { font: inherit; border: 0; background: none; color: inherit; }
+  textarea { flex: 1; width: 100%; border: 0; outline: 0; resize: none; background: transparent; color: var(--fg); font: inherit; padding: 4px 0; }
+  .bar { display: flex; gap: 8px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+  #tags { flex: 1; min-width: 0; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: var(--fg); font: inherit; font-size: 15px; padding: 8px 10px; }
+  #save { background: var(--accent); color: var(--bg); border-radius: 10px; padding: 10px 22px; font-weight: 600; }
+  #save:disabled { opacity: .35; }
+  #status { min-height: 1.4em; font-size: 14px; padding-bottom: 6px; }
+  .ok { color: var(--ok); } .err { color: var(--err); }
+  dialog { border: 1px solid var(--line); border-radius: 14px; background: var(--bg); color: var(--fg); width: min(92vw, 420px); }
+  dialog label { display: block; margin: 10px 0 4px; font-size: 14px; color: var(--muted); }
+  dialog input { width: 100%; font: inherit; padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: var(--fg); }
+  dialog .row { display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px; }
+</style>
+</head>
+<body>
+<header>
+  <span id="queue"></span>
+  <button id="cfg" aria-label="設定">⚙︎ 設定</button>
+</header>
+<textarea id="text" placeholder="1行目がタイトル、2行目以降が本文" autofocus></textarea>
+<div id="status"></div>
+<div class="bar">
+  <input id="tags" placeholder="タグ(カンマ区切り・任意)" autocomplete="off">
+  <button id="save" disabled>保存</button>
+</div>
+
+<dialog id="dlg">
+  <form method="dialog" id="form">
+    <label>Worker の URL</label>
+    <input id="cfgUrl" type="url" placeholder="https://notion-quick-memo.xxx.workers.dev" required>
+    <label>パスコード (APP_SECRET)</label>
+    <input id="cfgPass" type="password" autocomplete="off" required>
+    <div class="row"><button value="cancel" formnovalidate>閉じる</button><button value="ok"><b>保存</b></button></div>
+  </form>
+</dialog>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+let queue = store.get("queue", []);
+let sending = false;
+
+function status(msg, cls = "") { const s = $("status"); s.textContent = msg; s.className = cls; }
+function renderQueue() { $("queue").textContent = queue.length ? `未送信 ${queue.length}件` : ""; }
+function updateBtn() { $("save").disabled = !$("text").value.trim(); }
+
+async function send(item) {
+  const url = store.get("url", ""), pass = store.get("pass", "");
+  if (!url || !pass) throw Object.assign(new Error("設定が未入力です"), { fatal: true });
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-passcode": pass },
+    body: JSON.stringify(item),
+  });
+  if (res.ok) return;
+  const j = await res.json().catch(() => ({}));
+  // 認証/入力エラーは再送しても直らないので fatal
+  throw Object.assign(new Error(j.error || `HTTP ${res.status}`), { fatal: res.status < 500 });
+}
+
+async function flush() {
+  if (sending || !queue.length) return;
+  sending = true;
+  try {
+    while (queue.length) {
+      await send(queue[0]);
+      queue.shift(); store.set("queue", queue); renderQueue();
+    }
+    status("Notion に保存しました", "ok");
+  } catch (e) {
+    status(e.fatal ? `エラー: ${e.message}` : "オフライン。あとで自動送信します", "err");
+  } finally { sending = false; }
+}
+
+function save() {
+  const text = $("text").value.trim();
+  if (!text) return;
+  const tags = $("tags").value.split(/[,、]/).map((t) => t.trim()).filter(Boolean);
+  queue.push({ text, tags }); store.set("queue", queue); renderQueue();
+  $("text").value = ""; updateBtn(); $("text").focus();
+  status("送信中…");
+  flush();
+}
+
+$("text").addEventListener("input", updateBtn);
+$("text").addEventListener("keydown", (e) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter") save(); });
+$("save").addEventListener("click", save);
+$("tags").value = store.get("tags", "");
+$("tags").addEventListener("input", () => store.set("tags", $("tags").value));
+window.addEventListener("online", flush);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { $("text").focus(); flush(); } });
+
+$("cfg").addEventListener("click", () => {
+  $("cfgUrl").value = store.get("url", ""); $("cfgPass").value = store.get("pass", "");
+  $("dlg").showModal();
+});
+$("dlg").addEventListener("close", () => {
+  if ($("dlg").returnValue === "ok") {
+    store.set("url", $("cfgUrl").value.trim()); store.set("pass", $("cfgPass").value);
+    status("設定を保存しました", "ok"); flush();
+  }
+});
+
+// ?text=... で起動(ショートカットや共有から)した場合は本文に入れる
+const q = new URLSearchParams(location.search);
+const pre = [q.get("title"), q.get("text"), q.get("url")].filter(Boolean).join("\n");
+if (pre) { $("text").value = pre; updateBtn(); }
+
+renderQueue(); updateBtn();
+if (!store.get("url", "")) $("dlg").showModal(); else flush();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>

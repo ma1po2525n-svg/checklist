@@ -1,0 +1,7 @@
+name = "notion-quick-memo"
+main = "worker.js"
+compatibility_date = "2024-09-01"
+
+# [vars]
+# TITLE_PROP = "Name"      # DBのタイトル列の名前(日本語UIなら "名前" など)
+# TAG_PROP = "Tags"        # 複数選択列の名前(使うなら)
