@@ -40,3 +40,30 @@ npx wrangler deploy                    # 表示された https://…workers.dev 
 - 1行目 = タイトル、2行目以降 = 本文。タグは任意。
 - オフライン時は端末内に溜めて、オンライン復帰/再オープン時に自動送信。
 - `index.html?text=...` で起動すると本文が入った状態で開く(ショートカット連携用)。
+
+## LINEから送って登録する
+
+LINEの自分専用ボットにメッセージを送ると、Notion DBに登録されます(Worker の `/line` を使用)。
+
+1. https://developers.line.biz/ で Provider を作り、**Messaging API** チャネルを作成
+2. チャネル基本設定の **Channel secret**、Messaging API 設定の **Channel access token(長期)** を控える
+3. Worker に Secret を登録:
+   ```sh
+   cd quick-memo/worker
+   npx wrangler secret put LINE_CHANNEL_SECRET
+   npx wrangler secret put LINE_CHANNEL_TOKEN
+   npx wrangler deploy
+   ```
+4. Messaging API 設定の **Webhook URL** に `https://<Workerのドメイン>/line` を入れ、Webhook を「利用する」に。
+   応答メッセージ(自動応答)は「オフ」にする
+5. ボットを友だち追加し、何かメッセージを送る → 自分のユーザーIDが返信される
+6. そのIDを登録して再デプロイ(以降、自分以外のメッセージは無視される):
+   ```sh
+   npx wrangler secret put LINE_USER_ID
+   npx wrangler deploy
+   ```
+
+### 書き方
+- 1行目がタイトル、2行目以降が本文
+- `#仕事` のように書くとタグになる(`TAG_PROP` 設定時。本文からは取り除かれる)
+- 保存できたら「✅ 保存しました」と返信される。テキスト以外(画像など)は未対応
